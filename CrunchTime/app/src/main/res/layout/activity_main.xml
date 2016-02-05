@@ -28,7 +28,7 @@
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="Pushups"
         android:id="@+id/textView2"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="50dp"
         android:layout_below="@+id/textView"
         android:layout_alignParentStart="true" />
 
@@ -142,13 +142,25 @@
         android:layout_alignParentStart="true"
         android:layout_marginTop="16dp" />
 
-    <TextView
-        android:layout_width="wrap_content"
+    <EditText
+        android:layout_width="100dp"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:inputType="number"
+        android:textAppearance="?android:attr/textAppearanceMedium"
         android:id="@+id/calories"
-        android:layout_above="@+id/textView2"
-        android:layout_toEndOf="@+id/textView7" />
+        android:layout_alignBottom="@+id/burnedLabel"
+        android:layout_toEndOf="@+id/burnedLabel"
+        android:layout_marginBottom="-8dp" />
+
+    <EditText
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:id="@+id/totalCalories"
+        android:layout_alignBottom="@+id/totalLabel"
+        android:layout_toEndOf="@+id/burnedLabel"
+        android:layout_marginBottom="-8dp" />
 
     <EditText
         android:layout_width="wrap_content"
@@ -156,7 +168,7 @@
         android:inputType="number"
         android:ems="10"
         android:id="@+id/editText"
-        android:layout_above="@+id/editText2"
+        android:layout_alignBottom="@+id/textView2"
         android:layout_toEndOf="@+id/textView7"
         android:layout_marginLeft="24dp" />
 
@@ -258,6 +270,55 @@
         android:id="@+id/editText12"
         android:layout_alignBottom="@+id/textView13"
         android:layout_alignStart="@+id/editText" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="burned:"
+        android:id="@+id/burnedLabel"
+        android:layout_alignBottom="@+id/textView"
+        android:layout_toEndOf="@+id/textView2" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="net:"
+        android:layout_marginTop="8dp"
+        android:layout_marginLeft="4dp"
+        android:id="@+id/totalLabel"
+        android:layout_below="@+id/burnedLabel"
+        android:layout_toEndOf="@+id/textView" />
+
+    <Button
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:stateListAnimator="@null"
+        android:background="@drawable/roundedbutton"
+        android:gravity="center_vertical|center_horizontal"
+        android:layout_marginLeft="4dp"
+        android:text="+"
+        android:textSize="20sp"
+        android:textColor="#DEDEDE"
+        android:id="@+id/addCaloriesButton"
+        android:layout_alignTop="@+id/burnedLabel"
+        android:layout_toEndOf="@id/calories" />
+
+    <Button
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        android:stateListAnimator="@null"
+        android:background="@drawable/roundedbutton2"
+        android:gravity="center_vertical|center_horizontal"
+        android:textColor="#DEDEDE"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="8dp"
+        android:text="X"
+        android:textSize="10sp"
+        android:id="@+id/resetCaloriesButton"
+        android:layout_alignTop="@+id/totalLabel"
+        android:layout_toEndOf="@id/totalCalories" />
 
 </RelativeLayout>
 </ScrollView>

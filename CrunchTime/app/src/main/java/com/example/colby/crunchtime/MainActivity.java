@@ -1,6 +1,10 @@
 package com.example.colby.crunchtime;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.media.audiofx.BassBoost;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -20,8 +24,10 @@ public class MainActivity extends ActionBarActivity {
 
     EditText[] values;
     double[] denoms = {350, 200, 225, 25, 25, 10, 100, 12, 20, 12, 13, 15};
+    double weightFactor;
+    SharedPreferences SP;
     Set<Integer> repsIndices = new HashSet<>(Arrays.asList(0, 1, 2, 6));
-    TextView calories;
+    EditText calories, totalCalories;
     DecimalFormat df;
 
     @Override
@@ -29,10 +35,16 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        df = new DecimalFormat("#.####");
+        df = new DecimalFormat("#.##");
         df.setRoundingMode(RoundingMode.CEILING);
 
-        calories = (TextView) findViewById(R.id.calories);
+        SP = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+
+        // Editables
+        calories = (EditText) findViewById(R.id.calories);
+        totalCalories = (EditText) findViewById(R.id.totalCalories);
+        totalCalories.setText("2000");
+
         values = new EditText[] {
                 (EditText) findViewById(R.id.editText),
                 (EditText) findViewById(R.id.editText2),
@@ -48,6 +60,7 @@ public class MainActivity extends ActionBarActivity {
                 (EditText) findViewById(R.id.editText12)
         };
 
+        // Bind change on user input
         for (int i = 0; i < values.length; i++) {
             final int finalI = i;
             values[i].setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -80,6 +93,41 @@ public class MainActivity extends ActionBarActivity {
                 }
             });
         }
+
+        // User enters calories-to-exercise events
+        calories.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (event.getAction() == KeyEvent.ACTION_DOWN && event.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
+                    MainActivity.this.updateFromCalories();
+                }
+                return true;
+            }
+        });
+        calories.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+                    String strValue = calories.getText().toString();
+                    if (strValue.contains("reps") || strValue.contains("mins")) {
+                        calories.setText("");
+                    }
+                }
+            }
+        });
+        calories.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String strValue = calories.getText().toString();
+                if (strValue.contains("reps") || strValue.contains("mins")) {
+                    calories.setText("");
+                }
+            }
+        });
+
+        // Calories buttons
+
+
     }
 
     // idx: index last changed
@@ -92,9 +140,10 @@ public class MainActivity extends ActionBarActivity {
             } catch (Exception e) {
                 return;
             }
-            double newCalories = focusedValue / this.denoms[idx] * 100;
+            this.pollWeight();
+            double newCalories = weightFactor * focusedValue / this.denoms[idx] * 100;
 
-            calories.setText("" + newCalories);
+            calories.setText("" + df.format(newCalories));
 
             for (int i = 0; i < values.length; i++) {
                 double converted = focusedValue / this.denoms[idx] * this.denoms[i];
@@ -104,10 +153,42 @@ public class MainActivity extends ActionBarActivity {
                 } else {
                     values[i].setText(df.format(converted) + " mins");
                 }
-                Log.d("updateValues", values[i].getText().toString());
+            }
+        }
+    }
+
+    private void updateFromCalories() {
+        String caloriesText = calories.getText().toString();
+        if (!caloriesText.matches("")) {
+            double caloriesValue;
+            try {
+                caloriesValue = Double.valueOf(caloriesText);
+            } catch (Exception e) {
+                return;
+            }
+            this.pollWeight();
+            double multiplier = caloriesValue / 100.0 / weightFactor;
+
+            for (int i = 0; i < values.length; i++) {
+                double converted = this.denoms[i] * multiplier;
+
+                if (repsIndices.contains(i)) {
+                    values[i].setText(df.format(converted) + " reps");
+                } else {
+                    values[i].setText(df.format(converted) + " mins");
+                }
             }
         }
 
+    }
+
+    private void pollWeight() {
+        try {
+            double weight = Double.valueOf(SP.getString("weight", "150"));
+            weightFactor = weight / 150 * 1.005;
+        } catch (Exception e) {
+            weightFactor = 1.005;
+        }
     }
 
     @Override
@@ -126,6 +207,8 @@ public class MainActivity extends ActionBarActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            Intent i = new Intent(this, SettingsActivity.class);
+            startActivity(i);
             return true;
         }
 
