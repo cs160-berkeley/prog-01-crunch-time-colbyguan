@@ -11,6 +11,8 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -25,9 +27,12 @@ public class MainActivity extends ActionBarActivity {
     EditText[] values;
     double[] denoms = {350, 200, 225, 25, 25, 10, 100, 12, 20, 12, 13, 15};
     double weightFactor;
+    double resetCalories;
+
     SharedPreferences SP;
     Set<Integer> repsIndices = new HashSet<>(Arrays.asList(0, 1, 2, 6));
     EditText calories, totalCalories;
+    Button addCaloriesButton, resetCaloriesButton;
     DecimalFormat df;
 
     @Override
@@ -44,6 +49,10 @@ public class MainActivity extends ActionBarActivity {
         calories = (EditText) findViewById(R.id.calories);
         totalCalories = (EditText) findViewById(R.id.totalCalories);
         totalCalories.setText("2000");
+        resetCalories = 2000;
+
+        addCaloriesButton = (Button) findViewById(R.id.addCaloriesButton);
+        resetCaloriesButton = (Button) findViewById(R.id.resetCaloriesButton);
 
         values = new EditText[] {
                 (EditText) findViewById(R.id.editText),
@@ -66,7 +75,10 @@ public class MainActivity extends ActionBarActivity {
             values[i].setOnEditorActionListener(new TextView.OnEditorActionListener() {
                 @Override
                 public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                    if (event.getAction() == KeyEvent.ACTION_DOWN && event.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
+                    Log.d("caught event", "" + actionId);
+                    if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_NEXT ||
+                            event != null && event.getAction() == KeyEvent.ACTION_DOWN &&
+                                    (event.getKeyCode() == KeyEvent.KEYCODE_ENTER || event.getKeyCode() == KeyEvent.KEYCODE_NUMPAD_ENTER)) {
                         MainActivity.this.updateValues(finalI);
                     }
                     return true;
@@ -98,7 +110,9 @@ public class MainActivity extends ActionBarActivity {
         calories.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (event.getAction() == KeyEvent.ACTION_DOWN && event.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
+                if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_NEXT ||
+                        event != null && event.getAction() == KeyEvent.ACTION_DOWN &&
+                                (event.getKeyCode() == KeyEvent.KEYCODE_ENTER || event.getKeyCode() == KeyEvent.KEYCODE_NUMPAD_ENTER)) {
                     MainActivity.this.updateFromCalories();
                 }
                 return true;
@@ -125,8 +139,42 @@ public class MainActivity extends ActionBarActivity {
             }
         });
 
-        // Calories buttons
+        totalCalories.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_NEXT ||
+                        event != null && event.getAction() == KeyEvent.ACTION_DOWN &&
+                                (event.getKeyCode() == KeyEvent.KEYCODE_ENTER || event.getKeyCode() == KeyEvent.KEYCODE_NUMPAD_ENTER)) {
+                    try {
+                        MainActivity.this.resetCalories = Double.valueOf(MainActivity.this.totalCalories.getText().toString());
+                    } catch (Exception e) {
+                        return true;
+                    }
+                }
+                return true;
+            }
+        });
 
+        addCaloriesButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    double netValue = Double.valueOf(totalCalories.getText().toString());
+                    double calorieValue = Double.valueOf(calories.getText().toString());
+                    totalCalories.setText("" + df.format(netValue - calorieValue));
+                    calories.setText("");
+                } catch (Exception e) {
+                    return;
+                }
+            }
+        });
+
+        resetCaloriesButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                totalCalories.setText("" + df.format(resetCalories));
+            }
+        });
 
     }
 
